@@ -15,9 +15,9 @@ void main() {
     test('rand.allOps1', () {
       for (int i = 0; i < 100; i++) {
         final rnd = new math.Random();
-        BigInteger x = bigInt(rnd.nextInt(100000000));
-        BigInteger y = bigInt(rnd.nextInt(100000000));
-        BigInteger z = x / y;
+        BigInt x = bigInt(rnd.nextInt(100000000));
+        BigInt y = bigInt(rnd.nextInt(100000000));
+        BigInt z = x / y;
         z = z * y;
         z = z + x.remainder(y);
         z = z - x;
@@ -28,10 +28,10 @@ void main() {
     test('rand.allOps2', () {
       for (int i = 0; i < 100; i++) {
         final rnd = new math.Random();
-        BigInteger x = bigInt(rnd.nextInt(100000000));
-        BigInteger y = bigInt(rnd.nextInt(100000000));
+        BigInt x = bigInt(rnd.nextInt(100000000));
+        BigInt y = bigInt(rnd.nextInt(100000000));
         DivResult divRes = x.divide(y);
-        BigInteger z = divRes.q * y;
+        BigInt z = divRes.q * y;
         z = z + divRes.r;
         z = z - x;
         expect(z.toString(), '0');
@@ -41,11 +41,11 @@ void main() {
     test('rand.allOps3.bigValue', () {
       for (int i = 0; i < 100; i++) {
         final rnd = new math.Random();
-        BigInteger x = bigHex(largeNum1Base16);
-        BigInteger y = bigHex(
+        BigInt x = bigHex(largeNum1Base16);
+        BigInt y = bigHex(
             "${largeNum1Base16}${rnd.nextInt(100000000).toRadixString(16)}");
         DivResult divRes = x.divide(y);
-        BigInteger z = divRes.q * y;
+        BigInt z = divRes.q * y;
         z += divRes.r;
         z -= x;
         expect(z.toString(), '0');
@@ -62,10 +62,10 @@ void main() {
     });
 
     test('rand.allOps4.bigValue', () {
-      BigInteger a = bigInt(5);
-      BigInteger b = bigInt(20);
+      BigInt a = bigInt(5);
+      BigInt b = bigInt(20);
 
-      BigInteger res = new BigInteger();
+      BigInt res = new BigInt();
       res.assign = zero + a + b;
 
       expect(res.toString(), '25');

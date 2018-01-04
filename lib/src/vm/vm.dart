@@ -9,30 +9,30 @@ part 'ref.dart';
 
 /// Emulates signed and unsigned big integer on platforms where [int]
 /// supports big int.
-class BigIntegerVM implements BigInteger {
-  static BigIntegerVM get zero => new BigIntegerVM(0);
+class BigIntVm implements BigInt {
+  static BigIntVm get zero => new BigIntVm(0);
 
-  static BigIntegerVM get one => new BigIntegerVM(1);
+  static BigIntVm get one => new BigIntVm(1);
 
   /// The actual value
   int _value;
 
-  /// Creates a [BigIntegerVM] with integer value [_value]
+  /// Creates a [BigIntVm] with integer value [_value]
   ///
   /// Example:
   ///
   ///     final five = new BigIntegerVM(5);
-  BigIntegerVM([this._value = 0]);
+  BigIntVm([this._value = 0]);
 
-  /// Creates a [BigIntegerVM] with integer value obtained by converting [data]
+  /// Creates a [BigIntVm] with integer value obtained by converting [data]
   /// to integer.
   ///
   /// Example:
   ///
   ///     final five = new BigIntegerVM.fromNum(5.0);
-  BigIntegerVM.fromNum(num data) : _value = data.toInt();
+  BigIntVm.fromNum(num data) : _value = data.toInt();
 
-  BigIntegerVM.from8(int a, [int b, int c, int d, int e, int f, int g, int h]) {
+  BigIntVm.from8(int a, [int b, int c, int d, int e, int f, int g, int h]) {
     _value = a & 0xFF;
 
     for (int v in <int>[b, c, d, e, f, g, h]) {
@@ -42,7 +42,7 @@ class BigIntegerVM implements BigInteger {
     }
   }
 
-  BigIntegerVM.from16(int a, [int b, int c, int d]) {
+  BigIntVm.from16(int a, [int b, int c, int d]) {
     _value = a & 0xFFFF;
 
     for (int v in <int>[b, c, d]) {
@@ -52,21 +52,21 @@ class BigIntegerVM implements BigInteger {
     }
   }
 
-  BigIntegerVM.from32(int a, [int b]) {
+  BigIntVm.from32(int a, [int b]) {
     _value = a & 0xFFFFFFFF;
     if (b != null) _value = (_value << 32) | (b & 0xFFFFFFFF);
   }
 
-  /// Creates a [BigIntegerVM] from [bytes]
+  /// Creates a [BigIntVm] from [bytes]
   ///
   /// Example:
   ///
   ///     final five = new BigIntegerVM.fromBytes([0x5]);
-  BigIntegerVM.fromBytes(List<int> bytes) {
+  BigIntVm.fromBytes(List<int> bytes) {
     assignBytes = bytes;
   }
 
-  /// Creates a [BigIntegerVM] by parsing integer representation of [dataStr].
+  /// Creates a [BigIntVm] by parsing integer representation of [dataStr].
   ///
   /// [radix] can be used to parse integers encoded with radix other
   /// than 10. [radix] defaults to 10.
@@ -74,19 +74,19 @@ class BigIntegerVM implements BigInteger {
   /// Example:
   ///     final five = new BigIntegerVM.fromString('5');
   ///     final beef = new BigIntegerVM.fromString('beef', 16);
-  BigIntegerVM.fromString(String dataStr, [int radix]) {
+  BigIntVm.fromString(String dataStr, [int radix]) {
     setString(dataStr, radix);
   }
 
-  /// Creates a [BigIntegerVM] from [signum] and [bytes].
+  /// Creates a [BigIntVm] from [signum] and [bytes].
   ///
   /// Example:
   ///
   ///     final five = new BigIntegerVM.fromSignedBytes(-1, [0x5]);
-  factory BigIntegerVM.fromSignedBytes(int signum, List<int> magnitude) {
-    if (signum == 0) return new BigIntegerVM.fromBytes(magnitude);
+  factory BigIntVm.fromSignedBytes(int signum, List<int> magnitude) {
+    if (signum == 0) return new BigIntVm.fromBytes(magnitude);
 
-    final self = new BigIntegerVM();
+    final self = new BigIntVm();
     self.setSignedBytes(magnitude, true);
 
     if (signum < 0) {
@@ -96,16 +96,16 @@ class BigIntegerVM implements BigInteger {
     return self;
   }
 
-  /// Returns new [BigInteger] with same value as [this].
-  BigIntegerVM get clone => new BigIntegerVM(this._value);
+  /// Returns new [BigInt] with same value as [this].
+  BigIntVm get clone => new BigIntVm(this._value);
 
-  /// Returns a [BigIntegerRef] of clone of [this].
+  /// Returns a [BigIntRef] of clone of [this].
   ///
   /// Example:
   ///     final other = new BigIntegerVM(5);
   ///     final five = new BigIntegerVM(20);
   ///     five.assign += other; // five.toString() == '25'
-  BigIntegerVM get assign => new BigIntegerRefVM(clone);
+  BigIntVm get assign => new BigIntRefVm(clone);
 
   /// Assigns value of [this] to the value of [other]
   ///
@@ -113,7 +113,7 @@ class BigIntegerVM implements BigInteger {
   ///     final other = new BigIntegerVM(5);
   ///     final five = new BigIntegerVM();
   ///     five.assign = other;  // five.toString() = '5'
-  set assign(covariant BigIntegerVM other) => _value = other._value;
+  set assign(covariant BigIntVm other) => _value = other._value;
 
   /// Sets integer value to [value]
   ///
@@ -196,140 +196,140 @@ class BigIntegerVM implements BigInteger {
   }
 
   /// Return [this] + [other]. Does not modify either [this] or [other]!
-  BigIntegerVM operator +(covariant BigIntegerVM other) =>
-      new BigIntegerVM(_value + other._value);
+  BigIntVm operator +(covariant BigIntVm other) =>
+      new BigIntVm(_value + other._value);
 
   /// Return [this] - [other]. Does not modify either [this] or [other]!
-  BigIntegerVM operator -(covariant BigIntegerVM other) =>
-      new BigIntegerVM(_value - other._value);
+  BigIntVm operator -(covariant BigIntVm other) =>
+      new BigIntVm(_value - other._value);
 
   /// Return [this] * [other]. Does not modify either [this] or [other]!
-  BigIntegerVM operator *(covariant BigIntegerVM other) =>
-      new BigIntegerVM(_value * other._value);
+  BigIntVm operator *(covariant BigIntVm other) =>
+      new BigIntVm(_value * other._value);
 
   /// Return [this] / [other]. Does not modify either [this] or [other]!
-  BigIntegerVM operator /(covariant BigIntegerVM other) =>
-      new BigIntegerVM(_value ~/ other._value);
+  BigIntVm operator /(covariant BigIntVm other) =>
+      new BigIntVm(_value ~/ other._value);
 
   /// Return [this] ~/ [other]. Does not modify either [this] or [other]!
-  BigIntegerVM operator ~/(covariant BigIntegerVM other) =>
-      new BigIntegerVM(_value ~/ other._value);
+  BigIntVm operator ~/(covariant BigIntVm other) =>
+      new BigIntVm(_value ~/ other._value);
 
   /// Return [this] % [other]. Does not modify either [this] or [other]!
-  BigIntegerVM operator %(covariant BigIntegerVM other) =>
-      new BigIntegerVM(_value % other._value);
+  BigIntVm operator %(covariant BigIntVm other) =>
+      new BigIntVm(_value % other._value);
 
   /// Return -[this]. Does not modify [this]!
-  BigIntegerVM operator -() => new BigIntegerVM(-_value);
+  BigIntVm operator -() => new BigIntVm(-_value);
 
   /// Returns [this] & [other].Does not modify either [this] or [other]!
-  BigIntegerVM operator &(covariant BigIntegerVM other) =>
-      new BigIntegerVM(_value & other._value);
+  BigIntVm operator &(covariant BigIntVm other) =>
+      new BigIntVm(_value & other._value);
 
   /// Returns [this] | [other].Does not modify either [this] or [other]!
-  BigIntegerVM operator |(covariant BigIntegerVM other) =>
-      new BigIntegerVM(_value | other._value);
+  BigIntVm operator |(covariant BigIntVm other) =>
+      new BigIntVm(_value | other._value);
 
   /// Returns [this] ^ [other].Does not modify either [this] or [other]!
-  BigIntegerVM operator ^(covariant BigIntegerVM other) =>
-      new BigIntegerVM(_value ^ other._value);
+  BigIntVm operator ^(covariant BigIntVm other) =>
+      new BigIntVm(_value ^ other._value);
 
   /// Returns ~[this].Does not modify [this]!
-  BigIntegerVM operator ~() => new BigIntegerVM(~_value);
+  BigIntVm operator ~() => new BigIntVm(~_value);
 
-  BigIntegerVM andNot(covariant BigIntegerVM other) =>
-      new BigIntegerVM(_value & ~other._value);
+  BigIntVm andNot(covariant BigIntVm other) =>
+      new BigIntVm(_value & ~other._value);
 
   /// Return positive integer if [this] > [other], negative integer if [this] < [other],
   /// 0 if equal.
-  int compareTo(covariant BigIntegerVM other) => _value.compareTo(other._value);
+  int compareTo(covariant BigIntVm other) => _value.compareTo(other._value);
 
-  bool equals(covariant BigIntegerVM other) =>
+  bool equals(covariant BigIntVm other) =>
       this.compareTo(other) == 0 ? true : false;
 
-  bool operator <(covariant BigIntegerVM other) =>
+  bool operator <(covariant BigIntVm other) =>
       compareTo(other) < 0 ? true : false;
 
-  bool operator <=(covariant BigIntegerVM other) =>
+  bool operator <=(covariant BigIntVm other) =>
       compareTo(other) <= 0 ? true : false;
 
-  bool operator >(covariant BigIntegerVM other) =>
+  bool operator >(covariant BigIntVm other) =>
       compareTo(other) > 0 ? true : false;
 
-  bool operator >=(covariant BigIntegerVM other) =>
+  bool operator >=(covariant BigIntVm other) =>
       compareTo(other) >= 0 ? true : false;
 
   bool operator ==(other) {
-    if (other is! BigIntegerVM) return false;
+    if (other is! BigIntVm) return false;
     return compareTo(other) == 0 ? true : false;
   }
 
   /// Returns value left shifted by [n] bits.  Does not modify
   /// [this]!
-  BigIntegerVM operator <<(int n) => new BigIntegerVM(_value << n);
+  BigIntVm operator <<(int n) => new BigIntVm(_value << n);
 
   /// Returns value right shifted by [n] bits.  Does not modify
   /// [this]!
-  BigIntegerVM operator >>(int n) => new BigIntegerVM(_value >> n);
+  BigIntVm operator >>(int n) => new BigIntVm(_value >> n);
 
   /// Returns absolute value
-  BigIntegerVM abs() => new BigIntegerVM(_value.abs());
+  BigIntVm abs() => new BigIntVm(_value.abs());
 
-  DivResult divide(BigInteger denominator) {
+  DivResult divide(BigInt denominator) {
     return new DivResult(q: this / denominator, r: remainder(denominator));
   }
 
   /// Returns [this] % [denominator].
-  BigIntegerVM remainder(covariant BigIntegerVM denominator) =>
-      new BigIntegerVM(_value.remainder(denominator._value));
+  BigIntVm remainder(covariant BigIntVm denominator) =>
+      new BigIntVm(_value.remainder(denominator._value));
 
   /// Returns [this] ^ [e]
-  BigIntegerVM pow(int e) {
-    if (e > 0xffffffff || e < 1) return BigIntegerVM.one;
-    return new BigIntegerVM(math.pow(_value, e));
+  BigIntVm pow(int e) {
+    if (e > 0xffffffff || e < 1) return BigIntVm.one;
+    return new BigIntVm(math.pow(_value, e));
   }
 
   /// Returns [this]^[e] % [m]
   ///
   /// (HAC 14.85)
-  BigIntegerVM modPow(covariant BigIntegerVM e, covariant BigIntegerVM m) =>
-      new BigIntegerVM(_value.modPow(e._value, m._value));
+  BigIntVm modPow(covariant BigIntVm e, covariant BigIntVm m) =>
+      new BigIntVm(_value.modPow(e._value, m._value));
 
   /// Returns 1/[this] % m
   ///
   /// (HAC 14.61)
-  BigIntegerVM modInverse(covariant BigIntegerVM m) =>
-      new BigIntegerVM(_value.modInverse(m._value));
+  BigIntVm modInverse(covariant BigIntVm m) =>
+      new BigIntVm(_value.modInverse(m._value));
 
-  BigIntegerVM min(covariant BigIntegerVM a) =>
+  BigIntVm min(covariant BigIntVm a) =>
       (this.compareTo(a) < 0) ? this : a;
 
-  BigIntegerVM max(covariant BigIntegerVM a) =>
+  BigIntVm max(covariant BigIntVm a) =>
       (this.compareTo(a) > 0) ? this : a;
 
   /// Returns gcd([this], [other])
   ///
   /// (HAC 14.54)
-  BigIntegerVM gcd(covariant BigIntegerVM other) =>
-      new BigIntegerVM(_value.gcd(other._value));
+  BigIntVm gcd(covariant BigIntVm other) =>
+      new BigIntVm(_value.gcd(other._value));
 
   /// Returns [this] | (1 << [bitPos]). Does not modify [this].
-  BigIntegerVM setBit(int bitPos) => new BigIntegerVM(_value | (1 << bitPos));
+  BigIntVm setBit(int bitPos) => new BigIntVm(_value | (1 << bitPos));
 
   /// Returns [this] & ~(1 << [bitPos]). Does not modify [this].
-  BigIntegerVM clearBit(int bitPos) =>
-      new BigIntegerVM(_value & ~(1 << bitPos));
+  BigIntVm clearBit(int bitPos) =>
+      new BigIntVm(_value & ~(1 << bitPos));
 
   /// Returns [this] ^ (1 << [bitPos]). Does not modify [this].
-  BigIntegerVM toggleBit(int bitPos) =>
-      new BigIntegerVM(_value ^ (1 << bitPos));
+  BigIntVm toggleBit(int bitPos) =>
+      new BigIntVm(_value ^ (1 << bitPos));
 
   /// Returns [this] % [n] when n < 2^26
-  BigIntegerVM modInt(int n) => new BigIntegerVM(_value % n);
+  BigIntVm modInt(int n) => new BigIntVm(_value % n);
 
   /// Returns [this]^[e] % [m] when 0 <= e < 2^32.
-  BigIntegerVM modPowInt(int e, covariant BigIntegerVM m) =>
-      new BigIntegerVM(_value.modPow(e, m._value));
+  BigIntVm modPowInt(int e, covariant BigIntVm m) =>
+      new BigIntVm(_value.modPow(e, m._value));
 
   /// Returns true if value is even
   bool get isEven => _value.isEven;

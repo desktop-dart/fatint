@@ -2,97 +2,97 @@ library dart.fatint;
 
 import 'vm/vm.dart';
 
-BigInteger bigInt(int value) => new BigInteger(value);
+BigInt bigInt(int value) => new BigInt(value);
 
-BigInteger bigHex(String value) => new BigInteger.fromString(value, 16);
+BigInt bigHex(String value) => new BigInt.fromString(value, 16);
 
-BigInteger bigDec(String value) => new BigInteger.fromString(value);
+BigInt bigDec(String value) => new BigInt.fromString(value);
 
 /// Emulates signed and unsigned big integer on all supported platforms
-abstract class BigInteger implements Comparable<BigInteger> {
-  static BigInteger get zero {
+abstract class BigInt implements Comparable<BigInt> {
+  static BigInt get zero {
     if (_Context.isJs) {
       throw _jsNotSupportedException;
     } else {
-      return new BigIntegerVM(0);
+      return new BigIntVm(0);
     }
   }
 
-  static BigInteger get one {
+  static BigInt get one {
     if (_Context.isJs) {
       throw _jsNotSupportedException;
     } else {
-      return new BigIntegerVM(1);
+      return new BigIntVm(1);
     }
   }
 
-  /// Creates a [BigInteger] with integer value [_value]
+  /// Creates a [BigInt] with integer value [_value]
   ///
   /// Example:
   ///
   ///     final five = new BigIntegerVM(5);
-  factory BigInteger([int v]) {
+  factory BigInt([int v]) {
     // TODO if(v < Internal.minJsInt ||v > Internal.maxJsInt) throw new Exception();
     if (_Context.isJs) {
       throw _jsNotSupportedException;
     } else {
-      return new BigIntegerVM(v);
+      return new BigIntVm(v);
     }
   }
 
-  /// Creates a [BigInteger] with integer value obtained by converting [data]
+  /// Creates a [BigInt] with integer value obtained by converting [data]
   /// to integer.
   ///
   /// Example:
   ///
   ///     final five = new BigInteger.fromNum(5.0);
-  factory BigInteger.fromNum(num data) {
+  factory BigInt.fromNum(num data) {
     if (_Context.isJs) {
       throw _jsNotSupportedException;
     } else {
-      return new BigIntegerVM.fromNum(data);
+      return new BigIntVm.fromNum(data);
     }
   }
 
-  factory BigInteger.from8(int a,
+  factory BigInt.from8(int a,
       [int b, int c, int d, int e, int f, int g, int h]) {
     if (_Context.isJs) {
       throw _jsNotSupportedException;
     } else {
-      return new BigIntegerVM.from8(a, b, c, d, e, f, g, h);
+      return new BigIntVm.from8(a, b, c, d, e, f, g, h);
     }
   }
 
-  factory BigInteger.from16(int a, [int b, int c, int d]) {
+  factory BigInt.from16(int a, [int b, int c, int d]) {
     if (_Context.isJs) {
       throw _jsNotSupportedException;
     } else {
-      return new BigIntegerVM.from16(a, b, c, d);
+      return new BigIntVm.from16(a, b, c, d);
     }
   }
 
-  factory BigInteger.from32(int a, [int b]) {
+  factory BigInt.from32(int a, [int b]) {
     if (_Context.isJs) {
       throw _jsNotSupportedException;
     } else {
-      return new BigIntegerVM.from32(a, b);
+      return new BigIntVm.from32(a, b);
     }
   }
 
-  /// Creates a [BigInteger] from [bytes]
+  /// Creates a [BigInt] from [bytes]
   ///
   /// Example:
   ///
   ///     final five = new BigInteger.fromBytes([0x5]);
-  factory BigInteger.fromBytes(List<int> bytes) {
+  factory BigInt.fromBytes(List<int> bytes) {
     if (_Context.isJs) {
       throw _jsNotSupportedException;
     } else {
-      return new BigIntegerVM.fromBytes(bytes);
+      return new BigIntVm.fromBytes(bytes);
     }
   }
 
-  /// Creates a [BigInteger] by parsing integer representation of [dataStr].
+  /// Creates a [BigInt] by parsing integer representation of [dataStr].
   ///
   /// [radix] can be used to parse integers encoded with radix other
   /// than 10. [radix] defaults to 10.
@@ -100,32 +100,32 @@ abstract class BigInteger implements Comparable<BigInteger> {
   /// Example:
   ///     final five = new BigInteger.fromString('5');
   ///     final beef = new BigInteger.fromString('beef', 16);
-  factory BigInteger.fromString(String dataStr, [int radix]) {
+  factory BigInt.fromString(String dataStr, [int radix]) {
     if (_Context.isJs) {
       throw _jsNotSupportedException;
     } else {
-      return new BigIntegerVM.fromString(dataStr, radix);
+      return new BigIntVm.fromString(dataStr, radix);
     }
   }
 
-  factory BigInteger.fromSignedBytes(int signum, List<int> magnitude) {
+  factory BigInt.fromSignedBytes(int signum, List<int> magnitude) {
     if (_Context.isJs) {
       throw _jsNotSupportedException;
     } else {
-      return new BigIntegerVM.fromSignedBytes(signum, magnitude);
+      return new BigIntVm.fromSignedBytes(signum, magnitude);
     }
   }
 
-  /// Returns new [BigInteger] with same value as [this].
-  BigInteger get clone;
+  /// Returns new [BigInt] with same value as [this].
+  BigInt get clone;
 
-  /// Returns a [BigIntegerRef] of clone of [this].
+  /// Returns a [BigIntRef] of clone of [this].
   ///
   /// Example:
   ///     final other = new BigInteger(5);
   ///     final five = new BigInteger(20);
   ///     five.assign += other; // five.toString() == '25'
-  BigInteger get assign;
+  BigInt get assign;
 
   /// Assigns value of [this] to the value of [other]
   ///
@@ -133,7 +133,7 @@ abstract class BigInteger implements Comparable<BigInteger> {
   ///     final other = new BigInteger(5);
   ///     final five = new BigInteger();
   ///     five.assign = other;  // five.toString() = '5'
-  set assign(BigInteger other);
+  set assign(BigInt other);
 
   /// Sets integer value to [value]
   ///
@@ -172,104 +172,104 @@ abstract class BigInteger implements Comparable<BigInteger> {
   List<int> get toBytes;
 
   /// Return [this] + [other]. Does not modify either [this] or [other]!
-  BigInteger operator +(BigInteger other);
+  BigInt operator +(BigInt other);
 
   /// Return [this] - [other]. Does not modify either [this] or [other]!
-  BigInteger operator -(BigInteger other);
+  BigInt operator -(BigInt other);
 
   /// Return [this] * [other]. Does not modify either [this] or [other]!
-  BigInteger operator *(BigInteger other);
+  BigInt operator *(BigInt other);
 
   /// Return [this] / [other]. Does not modify either [this] or [other]!
-  BigInteger operator /(BigInteger other);
+  BigInt operator /(BigInt other);
 
   /// Return [this] ~/ [other]. Does not modify either [this] or [other]!
-  BigInteger operator ~/(BigInteger other);
+  BigInt operator ~/(BigInt other);
 
   /// Return [this] % [other]. Does not modify either [this] or [other]!
-  BigInteger operator %(BigInteger other);
+  BigInt operator %(BigInt other);
 
   /// Return -[this]. Does not modify [this]!
-  BigInteger operator -();
+  BigInt operator -();
 
   /// Returns [this] & [other].Does not modify either [this] or [other]!
-  BigInteger operator &(BigInteger other);
+  BigInt operator &(BigInt other);
 
   /// Returns [this] | [other].Does not modify either [this] or [other]!
-  BigInteger operator |(BigInteger other);
+  BigInt operator |(BigInt other);
 
   /// Returns [this] ^ [other].Does not modify either [this] or [other]!
-  BigInteger operator ^(BigInteger other);
+  BigInt operator ^(BigInt other);
 
   /// Returns ~[this]. Does not modify [this]!
-  BigInteger operator ~();
+  BigInt operator ~();
 
-  BigInteger andNot(covariant BigInteger other);
+  BigInt andNot(covariant BigInt other);
 
   /// Return positive integer if [this] > [other], negative integer if [this] < [other],
   /// 0 if equal.
-  int compareTo(BigInteger a);
+  int compareTo(BigInt a);
 
-  bool equals(BigInteger other);
+  bool equals(BigInt other);
 
-  bool operator <(BigInteger other);
+  bool operator <(BigInt other);
 
-  bool operator <=(BigInteger other);
+  bool operator <=(BigInt other);
 
-  bool operator >(BigInteger other);
+  bool operator >(BigInt other);
 
-  bool operator >=(BigInteger other);
+  bool operator >=(BigInt other);
 
   bool operator ==(other);
 
   /// Returns value left shifted by [n] bits.  Does not modify
   /// [this]!
-  BigInteger operator <<(int n);
+  BigInt operator <<(int n);
 
   /// Returns value right shifted by [n] bits.  Does not modify
   /// [this]!
-  BigInteger operator >>(int n);
+  BigInt operator >>(int n);
 
   /// Returns absolute value
-  BigInteger abs();
+  BigInt abs();
 
-  DivResult divide(BigInteger denominator);
+  DivResult divide(BigInt denominator);
 
   /// Returns [this] % [denominator].
-  BigInteger remainder(BigInteger denominator);
+  BigInt remainder(BigInt denominator);
 
   /// Returns [this] ^ [e]
-  BigInteger pow(int e);
+  BigInt pow(int e);
 
   /// Returns [this]^[e] % [m]
-  BigInteger modPow(BigInteger e, BigInteger m);
+  BigInt modPow(BigInt e, BigInt m);
 
   /// Returns 1/[this] % m
-  BigInteger modInverse(m);
+  BigInt modInverse(m);
 
-  BigInteger min(BigInteger other);
+  BigInt min(BigInt other);
 
-  BigInteger max(BigInteger other);
+  BigInt max(BigInt other);
 
   /// Returns gcd([this], [other])
   ///
   /// (HAC 14.54)
-  BigInteger gcd(BigInteger other);
+  BigInt gcd(BigInt other);
 
   /// Returns [this] | (1 << [bitPos]). Does not modify [this].
-  BigInteger setBit(int bitPos);
+  BigInt setBit(int bitPos);
 
   /// Returns [this] & ~(1 << [bitPos]). Does not modify [this].
-  BigInteger clearBit(int bitPos);
+  BigInt clearBit(int bitPos);
 
   /// Returns [this] ^ (1 << [bitPos]). Does not modify [this].
-  BigInteger toggleBit(int bitPos);
+  BigInt toggleBit(int bitPos);
 
   /// Returns [this] % [n] when n < 2^26
-  BigIntegerVM modInt(int n);
+  BigInt modInt(int n);
 
   /// Returns [this]^[e] % [m] when 0 <= e < 2^32.
-  BigInteger modPowInt(int e, BigInteger m);
+  BigInt modPowInt(int e, BigInt m);
 
   /// Returns true if value is even
   bool get isEven;
@@ -336,30 +336,30 @@ class _Context {
 
 class DivResult {
   /// Quotient component of divide operation.
-  BigInteger q;
+  BigInt q;
 
   /// Reminder component of divide operation.
-  BigInteger r;
+  BigInt r;
 
-  DivResult({BigInteger q, BigInteger r})
-      : q = q ?? new BigInteger(),
-        r = r ?? new BigInteger();
+  DivResult({BigInt q, BigInt r})
+      : q = q ?? new BigInt(),
+        r = r ?? new BigInt();
 }
 
-abstract class BigIntegerRef implements BigInteger {
-  factory BigIntegerRef() {
+abstract class BigIntRef implements BigInt {
+  factory BigIntRef() {
     if (_Context.isJs) {
       throw _jsNotSupportedException;
     } else {
-      return new BigIntegerRefVM(new BigIntegerVM(0));
+      return new BigIntRefVm(new BigIntVm(0));
     }
   }
 
-  factory BigIntegerRef.origin(BigInteger origin) {
+  factory BigIntRef.origin(BigInt origin) {
     if (_Context.isJs) {
       throw _jsNotSupportedException;
     } else {
-      return new BigIntegerRefVM(origin);
+      return new BigIntRefVm(origin);
     }
   }
 }
@@ -367,7 +367,7 @@ abstract class BigIntegerRef implements BigInteger {
 class EfficientBigMath {
   const EfficientBigMath._();
 
-  BigIntegerRef operator +(BigInteger other) => new BigIntegerRef() + other;
+  BigIntRef operator +(BigInt other) => new BigIntRef() + other;
 
   static const EfficientBigMath zero = const EfficientBigMath._();
 }

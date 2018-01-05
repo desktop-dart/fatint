@@ -88,12 +88,12 @@ class BigIntRefVm extends BigIntVm implements BigIntRef {
     return this;
   }
 
-  BigIntVm remainder(covariant BigIntVm denominator) {
+  BigIntRefVm remainder(covariant BigIntVm denominator) {
     _value = _value.remainder(denominator._value);
     return this;
   }
 
-  BigIntVm pow(int e) {
+  BigIntRefVm pow(int e) {
     if (e > 0xffffffff || e < 1) return BigIntVm.one;
     _value = math.pow(_value, e);
     return this;
@@ -104,7 +104,7 @@ class BigIntRefVm extends BigIntVm implements BigIntRef {
     return this;
   }
 
-  BigIntVm modInverse(covariant BigIntVm m) {
+  BigIntRefVm modInverse(covariant BigIntVm m) {
     _value = _value.modInverse(m._value);
     return this;
   }
@@ -151,5 +151,6 @@ class BigIntRefVm extends BigIntVm implements BigIntRef {
   /// Returns [this]^[e] % [m] when 0 <= e < 2^32.
   BigIntRefVm modPowInt(int e, covariant BigIntVm m) {
     _value = _value.modPow(e, m._value);
+    return this;
   }
 }

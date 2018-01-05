@@ -1,9 +1,11 @@
-library fatint.dartvm;
+library fatint.js;
 
 import 'dart:typed_data';
 import 'package:biginteger_js/biginteger_js.dart';
 
 import '../bignum.dart';
+
+part 'ref.dart';
 
 /// Emulates signed and unsigned big integer on platforms where [int]
 /// supports big int.
@@ -70,8 +72,9 @@ class BigIntJs implements BigInt {
   /// Example:
   ///
   ///     final five = new BigIntegerJs.fromBytes([0x5]);
-  BigIntJs.fromBytes(List<int> bytes) {
+  BigIntJs.fromBytes(List<int> bytes, [bool negate = false]) {
     assignBytes = bytes;
+    if(negate) _value = _value.negate();
   }
 
   /// Creates a [BigIntJs] by parsing integer representation of [dataStr].
@@ -86,21 +89,14 @@ class BigIntJs implements BigInt {
     setString(dataStr, radix);
   }
 
-  /// Creates a [BigIntJs] from [signum] and [bytes].
+  /// Creates a [BigIntJs] from [sign] and [bytes].
   ///
   /// Example:
   ///
-  ///     final five = new BigIntegerJs.fromSignedBytes(-1, [0x5]);
-  factory BigIntJs.fromSignedBytes(int signum, List<int> magnitude) {
-    if (signum == 0) return new BigIntJs.fromBytes(magnitude);
-
+  ///     final five = new BigIntegerJs.fromSignedBytes([0xFB]);
+  factory BigIntJs.fromSignedBytes(List<int> magnitude) {
     final self = new BigIntJs();
-    self.setSignedBytes(magnitude, true);
-
-    if (signum < 0) {
-      self._value = -self._value;
-    }
-
+    self.assignSignedBytes = magnitude;
     return self;
   }
 
@@ -113,7 +109,7 @@ class BigIntJs implements BigInt {
   ///     final other = new BigIntegerJs(5);
   ///     final five = new BigIntegerJs(20);
   ///     five.assign += other; // five.toString() == '25'
-  BigIntJs get assign => null; // TODO
+  BigIntJs get assign => new BigIntRefJs(this);
 
   /// Assigns value of [this] to the value of [other]
   ///
@@ -142,6 +138,30 @@ class BigIntJs implements BigInt {
     _value = MakeBigInt.fromBytes(bytes);
   }
 
+  set assignSignedBytes(List<int> bytes) {
+    if (bytes.length == 0) {
+      _value = MakeBigInt.fromNum();
+      return;
+    }
+
+    final bool isNeg = (bytes[0] & 0x80) != 0;
+
+    final ubytes = new Uint8List(bytes.length);
+
+    for (int i = 0; i < bytes.length; i++) {
+      final int ob = bytes[i];
+
+      if(!isNeg) {
+        ubytes[i] = ob & 0xFF;
+      } else {
+        ubytes[i] = (~ob) & 0xFF;
+      }
+    }
+
+    _value = MakeBigInt.fromBytes(ubytes);
+    _value = _value.next().negate();
+  }
+
   /// Parses the integer value from its string representation [dataStr].
   ///
   /// [radix] can be used to parse integers encoded with radix other
@@ -156,40 +176,19 @@ class BigIntJs implements BigInt {
     _value = MakeBigInt.fromString(dataStr, radix);
   }
 
-  void setSignedBytes(List<int> bytes, [bool isSigned = false]) {
-    if (bytes.length == 0) {
-      _value = 0;
-      return;
-    }
-
-    bool neg = false;
-    if (isSigned && (bytes[0] & 0xFF) > 0x7F) {
-      neg = true;
-    }
-
-    if (neg) {
-      int v = 0;
-      for (int byte in bytes) {
-        v = (v << 8) | (~((byte & 0xFF) - 256));
-      }
-      _value = ~v;
-    } else {
-      int v = 0;
-      for (int byte in bytes) {
-        v = (v << 8) | (byte & 0xFF);
-      }
-      _value = v;
-    }
-  }
-
   /// Return string representation with [radix].
   String toString({int radix = 10}) {
     return _value.toString(radix);
   }
 
   List<int> get toBytes {
-    // TODO
-    throw new UnimplementedError();
+    final ret = new Uint8List(byteLength);
+
+    for(int i = 0; i < byteLength; i++) {
+      ret[i] = _value.shiftRight(byteLength * 8).and(0xFF).toJSNumber();
+    }
+
+    return ret;
   }
 
   /// Return [this] + [other]. Does not modify either [this] or [other]!
@@ -335,8 +334,15 @@ class BigIntJs implements BigInt {
 
   /// Returns number of bits required to represent [this].
   int get bitLength {
-    // TODO
-    throw new UnimplementedError();
+    if(_value.isZero()) return 0;
+
+    BigInteger data = _value;
+    int ret = 0;
+    while(!data.isZero()) {
+      ret++;
+      data = data.shiftRight(1);
+    }
+    return ret;
   }
 
   /// Returns number of bytes required to represent [this].

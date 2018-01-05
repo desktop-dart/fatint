@@ -21,7 +21,7 @@ class BigIntVm implements BigInt {
   ///
   /// Example:
   ///
-  ///     final five = new BigIntegerVM(5);
+  ///     final five = new BigIntVm(5);
   BigIntVm([this._value = 0]);
 
   /// Creates a [BigIntVm] with integer value obtained by converting [data]
@@ -29,7 +29,7 @@ class BigIntVm implements BigInt {
   ///
   /// Example:
   ///
-  ///     final five = new BigIntegerVM.fromNum(5.0);
+  ///     final five = new BigIntVm.fromNum(5.0);
   BigIntVm.fromNum(num data) : _value = data.toInt();
 
   BigIntVm.from8(int a, [int b, int c, int d, int e, int f, int g, int h]) {
@@ -61,9 +61,10 @@ class BigIntVm implements BigInt {
   ///
   /// Example:
   ///
-  ///     final five = new BigIntegerVM.fromBytes([0x5]);
-  BigIntVm.fromBytes(List<int> bytes) {
+  ///     final five = new BigIntVm.fromBytes([0x5]);
+  BigIntVm.fromBytes(List<int> bytes, [bool negate = false]) {
     assignBytes = bytes;
+    if(negate) _value = -_value;
   }
 
   /// Creates a [BigIntVm] by parsing integer representation of [dataStr].
@@ -72,8 +73,8 @@ class BigIntVm implements BigInt {
   /// than 10. [radix] defaults to 10.
   ///
   /// Example:
-  ///     final five = new BigIntegerVM.fromString('5');
-  ///     final beef = new BigIntegerVM.fromString('beef', 16);
+  ///     final five = new BigIntVm.fromString('5');
+  ///     final beef = new BigIntVm.fromString('beef', 16);
   BigIntVm.fromString(String dataStr, [int radix]) {
     setString(dataStr, radix);
   }
@@ -82,17 +83,10 @@ class BigIntVm implements BigInt {
   ///
   /// Example:
   ///
-  ///     final five = new BigIntegerVM.fromSignedBytes(-1, [0x5]);
-  factory BigIntVm.fromSignedBytes(int signum, List<int> magnitude) {
-    if (signum == 0) return new BigIntVm.fromBytes(magnitude);
-
+  ///     final five = new BigIntVm.fromSignedBytes([0x5]);
+  factory BigIntVm.fromSignedBytes(List<int> bytes) {
     final self = new BigIntVm();
-    self.setSignedBytes(magnitude, true);
-
-    if (signum < 0) {
-      self._value = -self._value;
-    }
-
+    self.assignSignedBytes = bytes;
     return self;
   }
 
@@ -102,23 +96,23 @@ class BigIntVm implements BigInt {
   /// Returns a [BigIntRef] of clone of [this].
   ///
   /// Example:
-  ///     final other = new BigIntegerVM(5);
-  ///     final five = new BigIntegerVM(20);
+  ///     final other = new BigIntVm(5);
+  ///     final five = new BigIntVm(20);
   ///     five.assign += other; // five.toString() == '25'
   BigIntVm get assign => new BigIntRefVm(clone);
 
   /// Assigns value of [this] to the value of [other]
   ///
   /// Example:
-  ///     final other = new BigIntegerVM(5);
-  ///     final five = new BigIntegerVM();
+  ///     final other = new BigIntVm(5);
+  ///     final five = new BigIntVm();
   ///     five.assign = other;  // five.toString() = '5'
   set assign(covariant BigIntVm other) => _value = other._value;
 
   /// Sets integer value to [value]
   ///
   /// Example:
-  ///     final five = new BigIntegerVM();
+  ///     final five = new BigIntVm();
   ///     five.assignInt = 5;
   set assignInt(int v) => _value = v;
 
@@ -140,44 +134,41 @@ class BigIntVm implements BigInt {
     }
   }
 
+  set assignSignedBytes(List<int> bytes) {
+    if (bytes.length == 0) {
+      _value = 0;
+      return;
+    }
+
+    final bool isNeg = (bytes[0] & 0x80) != 0;
+
+    _value = 0;
+    for (int byte in bytes) {
+      _value <<= 8;
+      if (!isNeg)
+        _value |= byte & 0xFF;
+      else
+        _value |= (~byte) & 0xFF;
+    }
+
+    if (isNeg) {
+      _value++;
+      _value = -_value;
+    }
+  }
+
   /// Parses the integer value from its string representation [dataStr].
   ///
   /// [radix] can be used to parse integers encoded with radix other
   /// than 10. [radix] defaults to 10.
   ///
   /// Example:
-  ///     final five = new BigIntegerVM();
+  ///     final five = new BigIntVm();
   ///     five.setString('5');
-  ///     final beef = new BigIntegerVM();
+  ///     final beef = new BigIntVm();
   ///     five.setString('beef', 16);
   void setString(String dataStr, [int radix]) {
     _value = int.parse(dataStr, radix: radix, onError: (_) => 0);
-  }
-
-  void setSignedBytes(List<int> bytes, [bool isSigned = false]) {
-    if (bytes.length == 0) {
-      _value = 0;
-      return;
-    }
-
-    bool neg = false;
-    if (isSigned && (bytes[0] & 0xFF) > 0x7F) {
-      neg = true;
-    }
-
-    if (neg) {
-      int v = 0;
-      for (int byte in bytes) {
-        v = (v << 8) | (~((byte & 0xFF) - 256));
-      }
-      _value = ~v;
-    } else {
-      int v = 0;
-      for (int byte in bytes) {
-        v = (v << 8) | (byte & 0xFF);
-      }
-      _value = v;
-    }
   }
 
   /// Return string representation with [radix].
@@ -301,11 +292,9 @@ class BigIntVm implements BigInt {
   BigIntVm modInverse(covariant BigIntVm m) =>
       new BigIntVm(_value.modInverse(m._value));
 
-  BigIntVm min(covariant BigIntVm a) =>
-      (this.compareTo(a) < 0) ? this : a;
+  BigIntVm min(covariant BigIntVm a) => (this.compareTo(a) < 0) ? this : a;
 
-  BigIntVm max(covariant BigIntVm a) =>
-      (this.compareTo(a) > 0) ? this : a;
+  BigIntVm max(covariant BigIntVm a) => (this.compareTo(a) > 0) ? this : a;
 
   /// Returns gcd([this], [other])
   ///
@@ -317,12 +306,10 @@ class BigIntVm implements BigInt {
   BigIntVm setBit(int bitPos) => new BigIntVm(_value | (1 << bitPos));
 
   /// Returns [this] & ~(1 << [bitPos]). Does not modify [this].
-  BigIntVm clearBit(int bitPos) =>
-      new BigIntVm(_value & ~(1 << bitPos));
+  BigIntVm clearBit(int bitPos) => new BigIntVm(_value & ~(1 << bitPos));
 
   /// Returns [this] ^ (1 << [bitPos]). Does not modify [this].
-  BigIntVm toggleBit(int bitPos) =>
-      new BigIntVm(_value ^ (1 << bitPos));
+  BigIntVm toggleBit(int bitPos) => new BigIntVm(_value ^ (1 << bitPos));
 
   /// Returns [this] % [n] when n < 2^26
   BigIntVm modInt(int n) => new BigIntVm(_value % n);

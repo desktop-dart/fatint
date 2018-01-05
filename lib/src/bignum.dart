@@ -1,6 +1,7 @@
 library dart.fatint;
 
 import 'vm/vm.dart';
+import 'js/js.dart';
 
 BigInt bigInt(int value) => new BigInt(value);
 
@@ -12,7 +13,7 @@ BigInt bigDec(String value) => new BigInt.fromString(value);
 abstract class BigInt implements Comparable<BigInt> {
   static BigInt get zero {
     if (_Context.isJs) {
-      throw _jsNotSupportedException;
+      return new BigIntJs(0);
     } else {
       return new BigIntVm(0);
     }
@@ -20,7 +21,7 @@ abstract class BigInt implements Comparable<BigInt> {
 
   static BigInt get one {
     if (_Context.isJs) {
-      throw _jsNotSupportedException;
+      return new BigIntJs(1);
     } else {
       return new BigIntVm(1);
     }
@@ -30,11 +31,11 @@ abstract class BigInt implements Comparable<BigInt> {
   ///
   /// Example:
   ///
-  ///     final five = new BigIntegerVM(5);
+  ///     final five = new BigInt(5);
   factory BigInt([int v]) {
-    // TODO if(v < Internal.minJsInt ||v > Internal.maxJsInt) throw new Exception();
+    if (v < _Context.minJsInt || v > _Context.maxJsInt) throw new Exception();
     if (_Context.isJs) {
-      throw _jsNotSupportedException;
+      return new BigIntJs(v);
     } else {
       return new BigIntVm(v);
     }
@@ -45,19 +46,20 @@ abstract class BigInt implements Comparable<BigInt> {
   ///
   /// Example:
   ///
-  ///     final five = new BigInteger.fromNum(5.0);
-  factory BigInt.fromNum(num data) {
+  ///     final five = new BigInt.fromNum(5.0);
+  factory BigInt.fromNum(num v) {
+    if (v < _Context.minJsInt || v > _Context.maxJsInt) throw new Exception();
     if (_Context.isJs) {
-      throw _jsNotSupportedException;
+      return new BigIntJs.fromNum(v);
     } else {
-      return new BigIntVm.fromNum(data);
+      return new BigIntVm.fromNum(v);
     }
   }
 
   factory BigInt.from8(int a,
       [int b, int c, int d, int e, int f, int g, int h]) {
     if (_Context.isJs) {
-      throw _jsNotSupportedException;
+      return new BigIntJs.from8(a, b, c, d, e, f, g, h);
     } else {
       return new BigIntVm.from8(a, b, c, d, e, f, g, h);
     }
@@ -65,7 +67,7 @@ abstract class BigInt implements Comparable<BigInt> {
 
   factory BigInt.from16(int a, [int b, int c, int d]) {
     if (_Context.isJs) {
-      throw _jsNotSupportedException;
+      return new BigIntJs.from16(a, b, c, d);
     } else {
       return new BigIntVm.from16(a, b, c, d);
     }
@@ -73,7 +75,7 @@ abstract class BigInt implements Comparable<BigInt> {
 
   factory BigInt.from32(int a, [int b]) {
     if (_Context.isJs) {
-      throw _jsNotSupportedException;
+      return new BigIntJs.from32(a, b);
     } else {
       return new BigIntVm.from32(a, b);
     }
@@ -83,12 +85,12 @@ abstract class BigInt implements Comparable<BigInt> {
   ///
   /// Example:
   ///
-  ///     final five = new BigInteger.fromBytes([0x5]);
-  factory BigInt.fromBytes(List<int> bytes) {
+  ///     final five = new BigInt.fromBytes([0x5]);
+  factory BigInt.fromBytes(List<int> bytes, [bool negate = false]) {
     if (_Context.isJs) {
-      throw _jsNotSupportedException;
+      return new BigIntJs.fromBytes(bytes, negate);
     } else {
-      return new BigIntVm.fromBytes(bytes);
+      return new BigIntVm.fromBytes(bytes, negate);
     }
   }
 
@@ -98,21 +100,21 @@ abstract class BigInt implements Comparable<BigInt> {
   /// than 10. [radix] defaults to 10.
   ///
   /// Example:
-  ///     final five = new BigInteger.fromString('5');
-  ///     final beef = new BigInteger.fromString('beef', 16);
+  ///     final five = new BigInt.fromString('5');
+  ///     final beef = new BigInt.fromString('beef', 16);
   factory BigInt.fromString(String dataStr, [int radix]) {
     if (_Context.isJs) {
-      throw _jsNotSupportedException;
+      return new BigIntJs.fromString(dataStr, radix);
     } else {
       return new BigIntVm.fromString(dataStr, radix);
     }
   }
 
-  factory BigInt.fromSignedBytes(int signum, List<int> magnitude) {
+  factory BigInt.fromSignedBytes(List<int> bytes) {
     if (_Context.isJs) {
-      throw _jsNotSupportedException;
+      return new BigIntJs.fromSignedBytes(bytes);
     } else {
-      return new BigIntVm.fromSignedBytes(signum, magnitude);
+      return new BigIntVm.fromSignedBytes(bytes);
     }
   }
 
@@ -122,23 +124,23 @@ abstract class BigInt implements Comparable<BigInt> {
   /// Returns a [BigIntRef] of clone of [this].
   ///
   /// Example:
-  ///     final other = new BigInteger(5);
-  ///     final five = new BigInteger(20);
+  ///     final other = new BigInt(5);
+  ///     final five = new BigInt(20);
   ///     five.assign += other; // five.toString() == '25'
   BigInt get assign;
 
   /// Assigns value of [this] to the value of [other]
   ///
   /// Example:
-  ///     final other = new BigInteger(5);
-  ///     final five = new BigInteger();
+  ///     final other = new BigInt(5);
+  ///     final five = new BigInt();
   ///     five.assign = other;  // five.toString() = '5'
   set assign(BigInt other);
 
   /// Sets integer value to [value]
   ///
   /// Example:
-  ///     final five = new BigInteger();
+  ///     final five = new BigInt();
   ///     five.assignInt = 5;
   set assignInt(int value);
 
@@ -152,19 +154,19 @@ abstract class BigInt implements Comparable<BigInt> {
 
   set assignBytes(List<int> bytes);
 
+  set assignSignedBytes(List<int> bytes);
+
   /// Parses the integer value from its string representation [dataStr].
   ///
   /// [radix] can be used to parse integers encoded with radix other
   /// than 10. [radix] defaults to 10.
   ///
   /// Example:
-  ///     final five = new BigInteger();
+  ///     final five = new BigInt();
   ///     five.setString('5');
-  ///     final beef = new BigInteger();
+  ///     final beef = new BigInt();
   ///     five.setString('beef', 16);
   void setString(String dataStr, [int radix = 10]);
-
-  void setSignedBytes(List<int> bytes, [bool isSigned = false]);
 
   /// Return string representation with [radix].
   String toString({int radix = 10});
@@ -332,6 +334,10 @@ class _Context {
       return _isJs;
     }
   }
+
+  static int minJsInt = 0;
+
+  static int maxJsInt = 0;
 }
 
 class DivResult {
@@ -349,15 +355,15 @@ class DivResult {
 abstract class BigIntRef implements BigInt {
   factory BigIntRef() {
     if (_Context.isJs) {
-      throw _jsNotSupportedException;
+      return new BigIntRefJs(new BigIntJs());
     } else {
-      return new BigIntRefVm(new BigIntVm(0));
+      return new BigIntRefVm(new BigIntVm());
     }
   }
 
   factory BigIntRef.origin(BigInt origin) {
     if (_Context.isJs) {
-      throw _jsNotSupportedException;
+      return new BigIntRefJs(origin);
     } else {
       return new BigIntRefVm(origin);
     }

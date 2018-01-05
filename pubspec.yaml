@@ -1,6 +1,6 @@
 name: fatint
 description: Big fat integer support for Dart
-version: 1.0.0
+version: 2.0.0
 homepage: https://github.com/desktop-dart/fatint
 author: Ravi Teja Gudapati <tejainece@gmail.com>
 
@@ -11,8 +11,15 @@ environment:
 
 dependencies:
   rational: ^0.1.11
-  biginteger_js:
-    path: ../biginteger_js
+  biginteger_js: ^1.0.1
 
 dev_dependencies:
   test: ^0.12.0
+  browser: ^0.10.0
+  dart_to_js_script_rewriter: ^1.0.1
+
+#transformers:
+#- dart_to_js_script_rewriter
+#web:
+#  compiler:
+#    debug: dartdevc
